@@ -19,7 +19,7 @@ ma = Marshmallow(app)
 
 load_dotenv()
 
-from models import models
+from views.views import *
 # esto es para que flask migrate encuentre los modelos, borrar luego
 
 if __name__ == '__main__':
