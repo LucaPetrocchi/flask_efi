@@ -10,6 +10,10 @@ class Usuario(db.Model):
     correo = db.Column(db.String(100), nullable = True)
     password = db.Column(db.String(100), nullable = False)
     is_admin = db.Column(db.Boolean, default = False)
+    fecha_creacion = db.Column(db.DateTime, 
+                      nullable = False, 
+                      default = datetime.utcnow)
+
 
 class Tag(db.Model):
     __tablename__ = 'tag'
