@@ -6,14 +6,10 @@ class UsuarioSchema(ma.Schema):
     nombre = fields.String()
     correo = fields.String()
 
-    def getInfo(self, obj):
-        return f'{obj.id}\n{obj.nombre}\n{obj.correo}'
-
 class UsuarioAdminSchema(UsuarioSchema):
     password = fields.String()
     is_admin = fields.Boolean()
     fecha_creacion = fields.DateTime()
-    info = fields.Method('getInfo')
 
 class TagSchema(ma.Schema):
     id = fields.Integer(dump_only=True)

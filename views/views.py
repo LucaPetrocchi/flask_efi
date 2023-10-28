@@ -43,13 +43,14 @@ class Login(MethodView):
         nombre = request.json.get('nombre')
         password = request.json.get('password')
 
-        user = Usuario.query.filter_by(nombre=nombre).first()
-        if user and check_password_hash(user.password, password):
+        usuario = Usuario.query.filter_by(nombre=nombre).first()
+        if usuario and check_password_hash(usuario.password, password):
+            print('lol')
             access_token = create_access_token(
                 identity = nombre,
                 expires_delta = timedelta(minutes=120),
                 additional_claims = dict(
-                    is_admin = user.is_admin,
+                    is_admin = usuario.is_admin,
                 )
             )
             return jsonify({'ok': access_token})
@@ -59,24 +60,41 @@ app.add_url_rule(
     view_func=Login.as_view('login')
     )
 
-
-
 class UsuarioAPI(MethodView):
     def __init__(self):
        verify_jwt_in_request()
 
     def get(self, usuario_id=None):
-        if usuario_id == None:
+        additional_info = get_jwt() # hay manera de hacer que esta var sea global a la API?
+        is_admin = additional_info['is_admin']
+
+        if usuario_id == None and is_admin == False:
             usuarios = Usuario.query.all()
             usuarios_schema = UsuarioSchema(
-            ).dump(usuarios, many=True)
-        else:
+            ).dump(usuarios, many=True) 
+
+        elif usuario_id is not None and is_admin == False:
             usuarios = Usuario.query.get(usuario_id)
             usuarios_schema = UsuarioSchema(
             ).dump(usuarios)
+
+        elif usuario_id == None and is_admin == True:
+            usuarios = Usuario.query.all()
+            usuarios_schema = UsuarioAdminSchema(
+            ).dump(usuarios, many=True) 
+
+        elif usuario_id is not None and is_admin == True:
+            usuarios = Usuario.query.get(usuario_id)
+            usuarios_schema = UsuarioAdminSchema(
+            ).dump(usuarios)
+        
         return jsonify(usuarios_schema)
 
     def post(self):
+        additional_info = get_jwt()
+        if not additional_info['is_admin']:
+            return jsonify(Denegado='No tiene autorización') 
+
         usuario_json = UsuarioAdminSchema().load(request.json)
         nombre = usuario_json.get('nombre')
         correo = usuario_json.get('correo')
@@ -100,13 +118,37 @@ class UsuarioAPI(MethodView):
         db.session.add(nuevo_usuario)
         db.session.commit()
 
-        return jsonify({'Added': UsuarioSchema().dump(usuario_json)}, 200)
+        return jsonify({'Exitoso': UsuarioSchema().dump(usuario_json)}, 200)
 
     def put(self, usuario_id):
-        ...
-    def delete(self, usuario_id):
-        ...
+        usuario = Usuario.query.get(usuario_id)
+        usuario_json = UsuarioAdminSchema().load(request.json)
 
+        nombre = usuario_json.get('nombre')
+        correo = usuario_json.get('correo')
+        password = usuario_json.get('password')
+        is_admin = usuario_json.get('is_admin')
+
+        if nombre is not None:
+            usuario.nombre = nombre
+        if correo is not None:
+            usuario.correo = correo
+        if password is not None:
+            usuario.password = generate_password_hash(
+                password, method='pbkdf2', salt_length=16
+            )
+        if is_admin is not None:
+            usuario.is_admin = is_admin
+        
+        db.session.commit()
+
+        return jsonify({'Exitoso': UsuarioAdminSchema().dump(usuario)}, 200)
+        
+    def delete(self, usuario_id):
+        usuario = Usuario.query.get(usuario_id)
+        usuario.delete()
+        db.session.commit()
+        return jsonify({'Exitoso': f'BORRADO {usuario_id}'})
 app.add_url_rule(
     '/usuario', 
     view_func=UsuarioAPI.as_view('usuario')
