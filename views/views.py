@@ -45,7 +45,6 @@ class Login(MethodView):
 
         usuario = Usuario.query.filter_by(nombre=nombre).first()
         if usuario and check_password_hash(usuario.password, password):
-            print('lol')
             access_token = create_access_token(
                 identity = nombre,
                 expires_delta = timedelta(minutes=120),
@@ -106,7 +105,7 @@ class UsuarioAPI(MethodView):
                 
         already_exists = Usuario.query.filter_by(nombre=nombre).first()
         if already_exists:
-            return jsonify(error='Este nombre ya está en uso')
+            return jsonify(Error='Este nombre ya está en uso')
 
         nuevo_usuario = Usuario(
             nombre = nombre,
@@ -121,6 +120,9 @@ class UsuarioAPI(MethodView):
         return jsonify({'Exitoso': UsuarioSchema().dump(usuario_json)}, 200)
 
     def put(self, usuario_id):
+        if usuario_id is None:
+            return jsonify(Error='No se ha provisto id de usuario')
+
         usuario = Usuario.query.get(usuario_id)
         usuario_json = UsuarioAdminSchema().load(request.json)
 
@@ -145,16 +147,87 @@ class UsuarioAPI(MethodView):
         return jsonify({'Exitoso': UsuarioAdminSchema().dump(usuario)}, 200)
         
     def delete(self, usuario_id):
+        if usuario_id is None:
+            return jsonify(Error='No se ha provisto id de usuario')
+        
         usuario = Usuario.query.get(usuario_id)
-        usuario.delete()
+        dump = UsuarioAdminSchema().dump(usuario)
+        db.session.delete(usuario)
         db.session.commit()
-        return jsonify({'Exitoso': f'BORRADO {usuario_id}'})
+        return jsonify({'Borrado': dump})
 app.add_url_rule(
     '/usuario', 
     view_func=UsuarioAPI.as_view('usuario')
-    )
+)
 app.add_url_rule(
     '/usuario/<usuario_id>',
     view_func=UsuarioAPI.as_view('usuario_por_id')
-    )
+)
 
+class TagAPI(MethodView):
+    def __init__(self):
+        verify_jwt_in_request()
+
+    def get(self, tag_id=None):
+        if tag_id is not None:
+            tags = Tag.query.get(tag_id)
+            tags_schema = TagSchema(
+            ).dump(tags)
+        else:
+            tags = Tag.query.all()
+            tags_schema = TagSchema(
+            ).dump(tags, many=True)
+        return jsonify(tags_schema)
+    
+    def post(self):
+        additional_info = get_jwt()
+        if not additional_info['is_admin']:
+            return jsonify(Denegado='No tiene autorización')
+        
+        tag_json = TagSchema().load(request.json)
+        nombre = tag_json.get('nombre') # manera de hacer esto en una línea?
+
+        already_exists = Tag.query.filter_by(nombre=nombre).first()
+        if already_exists:
+            return jsonify(Error='Este tag ya existe')
+        
+        nuevo_tag = Tag(nombre=nombre)
+
+        db.session.add(nuevo_tag)
+        db.session.commit()
+        
+        return jsonify({'Exitoso': TagSchema().dump(tag_json)}, 200)
+        
+    def put(self, tag_id):
+        if tag_id is None:
+            return jsonify(Error='No se ha provisto id de tag')
+        
+        tag = Tag.query.get(tag_id)
+        tag_json = TagSchema().load(request.json)
+
+        nombre = tag_json.get('nombre')
+
+        tag.nombre = nombre
+
+        db.session.commit()
+
+        return jsonify({'Exitoso': TagSchema().dump(tag)}, 200)
+        
+    def delete(self, tag_id):
+        if tag_id is None:
+            return jsonify(Error='No se ha provisto id de tag')
+
+        tag = Tag.query.get(tag_id)
+        dump = TagSchema().dump(tag)
+        db.session.delete(tag)
+        db.session.commit()
+        return jsonify({'Borrado': dump})
+
+app.add_url_rule(
+    '/tag',
+    view_func=TagAPI.as_view('tag')
+)
+app.add_url_rule(
+    '/tag/<tag_id>',
+    view_func=TagAPI.as_view('tag_por_id')
+)
