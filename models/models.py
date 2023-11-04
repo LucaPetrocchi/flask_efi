@@ -14,10 +14,17 @@ class Usuario(db.Model):
     fecha_creacion = db.Column(db.DateTime, 
                       nullable = False, 
                       default = datetime.utcnow)
+    comentarios = db.relationship('Comentario', cascade = 'all, delete')
 
 post_tags = db.Table('post_tags',
-    db.Column('post_id', db.Integer, db.ForeignKey('post.id')),
-    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'))
+    db.Column('post_id', 
+              db.Integer, 
+              db.ForeignKey('post.id'), 
+              primary_key=True),
+    db.Column('tag_id', 
+              db.Integer, 
+              db.ForeignKey('tag.id'), 
+              primary_key=True)
     ) 
 
 class Post(db.Model):
@@ -31,7 +38,11 @@ class Post(db.Model):
     usuario_id = db.Column(db.Integer, 
                            ForeignKey('usuario.id'), 
                            nullable = False)
-    tags = db.relationship('Tag', secondary=post_tags, backref='posts')
+    usuario_obj = db.relationship('Usuario')
+    tags = db.relationship('Tag', 
+                           secondary = post_tags,
+                           cascade = 'all, delete')
+    comentarios = db.relationship('Comentario', cascade = 'all, delete')
 
 class Tag(db.Model):
     __tablename__ = 'tag'
@@ -44,6 +55,9 @@ class Tag(db.Model):
 class Comentario(db.Model):
     __tablename__ = 'comentario'
     id = db.Column(db.Integer, primary_key = True)
+    post_id = db.Column(db.Integer, 
+                        ForeignKey('post.id'),
+                        nullable = False)
     contenido = db.Column(db.String(100), nullable = False)
     fecha = db.Column(db.DateTime, 
                       nullable = False, 
@@ -51,6 +65,7 @@ class Comentario(db.Model):
     usuario_id = db.Column(db.Integer, 
                            ForeignKey('usuario.id'), 
                            nullable = False)
+    usuario_obj = db.relationship('Usuario')
 
 
 
