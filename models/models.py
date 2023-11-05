@@ -1,6 +1,9 @@
 from app import db
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, event
 from sqlalchemy.orm import relationship, DeclarativeBase
+from werkzeug.security import (
+    generate_password_hash,
+)
 from datetime import datetime
 
 
@@ -50,8 +53,6 @@ class Post(db.Model):
     def __str__(self):
         return self.name
 
-
-
 class Tag(db.Model):
     __tablename__ = 'tag'
     id = db.Column(db.Integer, primary_key = True)
@@ -78,5 +79,3 @@ class Comentario(db.Model):
 
     def __str__(self):
         return self.name
-
-

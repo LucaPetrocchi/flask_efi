@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+{% block title %} ERROR 404 {% endblock %}
+{% block body %}
+
+<h1> ERROR: Ruta No Existe </h1>
+
+<h2> Endpoints: </h2>
+
+<ul>
+    <li> /login </li>
+    <li> /usuario </li>
+    <li> /tag (requiere JWT) </li>
+    <li> /post </li>
+</ul>
+
+<p>Se requiere de request JSON y token JWT. Véase documentación.</p>
+
+{% endblock %}

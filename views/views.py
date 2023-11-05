@@ -17,6 +17,7 @@ from werkzeug.security import (
     generate_password_hash,
     check_password_hash,
 )
+from sqlalchemy import event
 from sqlalchemy.exc import SQLAlchemyError
 from marshmallow.exceptions import ValidationError
 from app import app, db, jwt
@@ -36,6 +37,22 @@ from schemas.schemas import (
 )
 
 from error_handlers import *
+
+def admin_user_init():
+    with app.app_context():
+        users = Usuario.query.all()
+        if not users:
+            admin = Usuario(
+                nombre = 'admin',
+                correo = 'admin@admin.com',
+                password = generate_password_hash(
+                    '123', method='pbkdf2', salt_length=16
+                ),
+                is_admin = True
+            )
+            db.session.add(admin)
+            db.session.commit()
+
 
 def get_permissions():
     try:

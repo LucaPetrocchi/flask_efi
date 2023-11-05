@@ -1,5 +1,6 @@
 from flask import (
-    jsonify
+    jsonify,
+    render_template,
 )
 from app import app
 
