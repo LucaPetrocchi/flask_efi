@@ -1,7 +1,6 @@
 from flask import (
     jsonify
 )
-
 from app import app
 
 class UnauthorizedError(Exception):
@@ -20,6 +19,9 @@ class ConflictError(Exception):
     codigo = 409
     descripcion = "La data enviada no puede ser aceptada por un conflicto"
 
+@app.errorhandler(404)
+def server_error(err):
+    return "Ruta no existe"
 
 @app.errorhandler(Exception)
 def api_error(err):
@@ -31,3 +33,4 @@ def api_error(err):
         response["mensaje"] = err.args[0]
     
     return jsonify(response), err.codigo
+

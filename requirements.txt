@@ -9,6 +9,7 @@ flask-marshmallow==0.15.0
 Flask-Migrate==4.0.5
 Flask-SQLAlchemy==3.1.1
 greenlet==3.0.1
+gunicorn==21.2.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
 Mako==1.2.4
@@ -19,7 +20,6 @@ packaging==23.2
 PyJWT==2.8.0
 PyMySQL==1.1.0
 python-dotenv==1.0.0
-setuptools==68.2.2
 SQLAlchemy==2.0.22
 typing_extensions==4.8.0
 Werkzeug==3.0.1

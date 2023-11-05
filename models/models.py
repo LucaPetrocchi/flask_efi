@@ -8,13 +8,16 @@ class Usuario(db.Model):
     __tablename__ = 'usuario'
     id = db.Column(db.Integer, primary_key = True)
     nombre = db.Column(db.String(100), nullable = False)
-    correo = db.Column(db.String(100), nullable = True)
+    correo = db.Column(db.String(100), nullable = True, unique = True)
     password = db.Column(db.String(500), nullable = False)
     is_admin = db.Column(db.Boolean, default = False)
     fecha_creacion = db.Column(db.DateTime, 
                       nullable = False, 
                       default = datetime.utcnow)
     posts = db.relationship('Post', cascade = 'all, delete')
+
+    def __str__(self):
+        return self.name
 
 post_tags = db.Table('post_tags',
     db.Column('post_id', 
@@ -43,13 +46,19 @@ class Post(db.Model):
                            secondary = post_tags,
                            cascade = 'all, delete')
     comentarios = db.relationship('Comentario', cascade = 'all, delete')
+    
+    def __str__(self):
+        return self.name
+
+
 
 class Tag(db.Model):
     __tablename__ = 'tag'
     id = db.Column(db.Integer, primary_key = True)
-    nombre = db.Column(db.String(100), nullable = False)
-    # relationship aca?? por si quiero que el TagSchema
-    # muestre todos los posts con este tag
+    nombre = db.Column(db.String(100), nullable = False, unique = True)
+
+    def __str__(self):
+        return self.name
 
 
 class Comentario(db.Model):
@@ -67,5 +76,7 @@ class Comentario(db.Model):
                            nullable = False)
     usuario_obj = db.relationship('Usuario')
 
+    def __str__(self):
+        return self.name
 
 
