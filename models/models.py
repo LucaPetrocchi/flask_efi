@@ -14,7 +14,7 @@ class Usuario(db.Model):
     fecha_creacion = db.Column(db.DateTime, 
                       nullable = False, 
                       default = datetime.utcnow)
-    comentarios = db.relationship('Comentario', cascade = 'all, delete')
+    posts = db.relationship('Post', cascade = 'all, delete')
 
 post_tags = db.Table('post_tags',
     db.Column('post_id', 
@@ -38,7 +38,7 @@ class Post(db.Model):
     usuario_id = db.Column(db.Integer, 
                            ForeignKey('usuario.id'), 
                            nullable = False)
-    usuario_obj = db.relationship('Usuario')
+    usuario_obj = db.relationship('Usuario', viewonly=True)
     tags = db.relationship('Tag', 
                            secondary = post_tags,
                            cascade = 'all, delete')
