@@ -3,23 +3,18 @@ from datetime import timedelta
 from flask import (
     jsonify, 
     request,
-    abort,
 )
 from flask.views import MethodView
 from flask_jwt_extended import (
     create_access_token,
     get_jwt,
-    get_jwt_identity,
-    jwt_required,
     verify_jwt_in_request,
 )
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash,
 )
-from sqlalchemy import event
 from sqlalchemy.exc import SQLAlchemyError
-from marshmallow.exceptions import ValidationError
 from app import app, db, jwt
 from models.models import (
     Usuario,

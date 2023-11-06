@@ -1,9 +1,5 @@
 from app import db
-from sqlalchemy import ForeignKey, event
-from sqlalchemy.orm import relationship, DeclarativeBase
-from werkzeug.security import (
-    generate_password_hash,
-)
+from sqlalchemy import ForeignKey
 from datetime import datetime
 
 

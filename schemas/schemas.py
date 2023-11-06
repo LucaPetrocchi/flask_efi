@@ -31,8 +31,6 @@ class PostSchema(ma.Schema):
     tags = fields.List(fields.Nested(TagSchema), many=True)
     usuario_id = fields.Integer()
     usuario_obj = fields.Nested(UsuarioSchema, exclude={'id'})
-    # hay manera de hacer que el comentario sea un subtipo de esto?
-    # o al reves? porque son lo mismo con menos info
     comentarios = fields.Nested(ComentarioSchema, exclude={'id'}, many=True)
 
 
